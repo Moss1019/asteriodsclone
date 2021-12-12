@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Websocket app</title>
+
+    <link rel="stylesheet" href="css/main.css" asp-append-version="true" />
+
+    <script src="js/gl-matrix-min.js"></script>
+    <script src="js/webgl.js"></script>
+    <script src="js/websocket.js"></script>
+    <script src="js/values.js"></script>
+    <script src="js/util.js"></script>
+
+    <script type="x-shader/v-shader" id="shader-vs">
+        attribute vec3 aVertexPosition;
+        attribute vec3 aVertexColor;
+
+        varying highp vec4 vColor;
+
+        uniform mat4 uPMatrix;
+        uniform mat4 uVMatrix;
+        uniform mat4 uMVMatrix;
+
+        void main(void) {
+            gl_Position = uPMatrix * uVMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+           // vColor = vec4(aVertexColor, 1.0);
+        }
+    </script>
+
+    <script type="x-shader/f-shader" id="shader-fs">
+        varying highp vec4 vColor;
+
+        void main(void) {
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+        }
+    </script>
+
+    <script>
+        function onKeyDown(ev) {
+            const command = { Type: 0 };
+            if(ev.keyCode === 38) {
+                command.Type = 38;
+            } else if(ev.keyCode === 37) {
+                command.Type = 37;
+            } else if(ev.keyCode === 39) {
+                command.Type = 39;
+            } else if(ev.keyCode === 32) {
+                command.Type = 32;
+            } else {
+                console.log(ev.keyCode);
+                return;
+            }
+            s.send(JSON.stringify(command));
+        }
+
+        function onKeyUp(ev) {
+            const command = { Type: 0 };
+            if(ev.keyCode === 38) {
+                command.Type = -38;
+            } else if(ev.keyCode === 37) {
+                command.Type = -37;
+            } else if(ev.keyCode === 39) {
+                command.Type = -39;
+            } else {
+                console.log(ev.keyCode);
+                return;
+            }
+            s.send(JSON.stringify(command));
+        }
+
+        function main() {
+            initWebsocket();
+            setupWebGl();
+            initProgram();
+            initBuffers();
+            initLocations();
+
+            setInterval(() => {
+                drawScene();
+            }, 1000 / 60);
+        }
+    </script>
+
+</head>
+<body onload="main()" onkeydown="onKeyDown(event)" onkeyup="onKeyUp(event)">
+    <canvas 
+        id="canvas" 
+        width="800"
+        height="600"
+    >
+
+    </canvas>
+    <p id="asteriods"></p>
+</body>
+</html>
